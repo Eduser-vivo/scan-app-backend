@@ -4,9 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Fiche;
 use App\Form\FicheType;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,45 +16,63 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class FicheController extends AbstractController
 {
     /**
-     * @Route("/", name="fiche_acceuil")
+     * @Route("/historique", name="fiche_acceuil")
      */
-    public function acceuilAction(PaginatorInterface $paginator, Request $request)
+    public function acceuilAction()
     {
         $repository = $this->getDoctrine()->getManager()->getRepository(Fiche::class);
 
-        $fiches = $paginator->paginate($repository->findAll(), $request->query->getInt('page', 1), 5);
+        $fiches = $repository->findAll();
 
-        return $this->render('fiche/acceuil.html.twig', ['fiches' => $fiches]);
+        $data = [];
+        foreach ($fiches as $key => $fiche) {
+            $data[$key]['id'] = $fiche->getId();
+            $data[$key]['signataire'] = $fiche->getSignataire();
+            $data[$key]['adresse'] = $fiche->getAdresse();
+            $data[$key]['creantier'] = $fiche->getCreantier();
+            $data[$key]['montant'] = $fiche->getMontant();
+            $data[$key]['motif'] = $fiche->getMotif();
+            $data[$key]['lieu'] = $fiche->getLieu();
+            $data[$key]['date'] = $fiche->getDate();
+        }
+
+        return new JsonResponse($data);
     }
 
     /**
-     * @Route("/fiches", name="fiches_with_filtre")
+     * @Route("/fiches/{date1}/{date2}", name="fiches_with_filtre" )
      */
-    public function fichesWithFiltre(PaginatorInterface $paginator, Request $request)
+    public function fichesWithFiltre($date1, $date2)
     {
         $repository = $this->getDoctrine()->getManager()->getRepository(Fiche::class);
 
-        $session = new Session();
-        $session->start();
+        // $session = new Session();
+        // $session->start();
 
-        if ($request->isMethod('POST')) {
-            $date1 = $request->request->get('date1');
-            $date2 = $request->request->get('date2');
-            $session->set('date1', $date1);
-            $session->set('date2', $date2);
+        // if ($request->isMethod('POST')) {
+        //     $date1 = $request->request->get('date1');
+        //     $date2 = $request->request->get('date2');
+        //     $session->set('date1', $date1);
+        //     $session->set('date2', $date2);
+        // }
+
+        // $date1 = $session->get('date1');
+        // $date2 = $session->get('date2');
+        $fiches = $repository->findFicheWithDate($date1, $date2);
+
+        $data = [];
+        foreach ($fiches as $key => $fiche) {
+            $data[$key]['id'] = $fiche->getId();
+            $data[$key]['signataire'] = $fiche->getSignataire();
+            $data[$key]['adresse'] = $fiche->getAdresse();
+            $data[$key]['creantier'] = $fiche->getCreantier();
+            $data[$key]['montant'] = $fiche->getMontant();
+            $data[$key]['motif'] = $fiche->getMotif();
+            $data[$key]['lieu'] = $fiche->getLieu();
+            $data[$key]['date'] = $fiche->getDate();
         }
 
-        $date1 = $session->get('date1');
-        $date2 = $session->get('date2');
-        $fiches = $paginator->paginate($repository->findFicheWithDate($date1, $date2), $request->query->getInt('page', 1), 3);
-        $count = count($fiches);
-
-        return $this->render('fiche/filtre.html.twig', [
-            'fiches' => $fiches,
-            'count' => $count,
-            'date1' => $date1,
-            'date2' => $date2,
-            ]);
+        return new JsonResponse($data);
     }
 
     /**
@@ -78,13 +97,11 @@ class FicheController extends AbstractController
                 $em->persist($fiche);
                 $em->flush();
 
-                return $this->redirectToRoute('fiche_affiche', ['id' => $fiche->getId()]);
+                return new Response('insertion reussi');
             }
         }
 
-        return $this->render('fiche/form.html.twig', [
-            'form' => $form->createView(),
-            ]);
+        return new Response('fiche insertion');
     }
 
     /**
@@ -102,12 +119,11 @@ class FicheController extends AbstractController
         return $this->render('fiche/fiche.html.twig', ['formData' => $fiche]);
     }
 
-     /**
+    /**
      * @Route("/fiche/{id}", name="pdf_action",  requirements={"id"="\d+"})
      */
     public function pdfAction()
     {
-        
         $em = $this->getDoctrine()->getManager();
         $fiche = $em->getRepository(Fiche::class)->find($id);
 
@@ -116,7 +132,7 @@ class FicheController extends AbstractController
         }
 
         $html = $this->renderView('fiche/fiche.html.twig', [
-            'formData'=>$fiche,
+            'formData' => $fiche,
         ]);
 
         return new PdfResponse(
