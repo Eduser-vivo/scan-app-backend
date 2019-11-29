@@ -8,6 +8,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 
+
 /**
  * @ORM\Entity(repositoryClass="App\Repository\FicheRepository")
  * @ApiFilter(
@@ -16,6 +17,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
  *          "date"
  *      }
  *  )
+ * 
  * @ApiResource()
  */
 class Fiche
