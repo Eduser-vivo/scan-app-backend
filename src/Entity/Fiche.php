@@ -3,11 +3,19 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\FicheRepository")
+ * @ApiFilter(
+ *      DateFilter::class,
+ *      properties={
+ *          "date"
+ *      }
+ *  )
  * @ApiResource()
  */
 class Fiche

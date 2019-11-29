@@ -37,7 +37,7 @@ class AppFixtures extends Fixture
 
         $user = $this->getReference('user_admin');
 
-        for($i = 0; $i < 100; $i++){
+        for($i = 0; $i < 10; $i++){
             $fiche = new Fiche();
             $fiche->setSignataire($this->faker->realText(15));
             $fiche->setAdresse($this->faker->realText(11));
