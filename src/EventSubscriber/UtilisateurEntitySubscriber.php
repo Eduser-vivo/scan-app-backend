@@ -1,24 +1,24 @@
 <?php
 namespace App\EventSubscriber;
 
+use App\Entity\Fiche;
 use Symfony\Component\HttpKernel\KernelEvents;
 use ApiPlatform\Core\EventListener\EventPriorities;
-use App\Entity\Fiche;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class UtilisateurEntitySubscriber implements EventSubscriberInterface
 {
-    /** 
+
+    /**
      * @var TokenStorageInterface
      */
-    private $tokenStorage;
+    private $tokenSotrage;
 
-    public function __construct(TokenStorageInterface $tokenStorage)
+    public function __construct(TokenStorageInterface $tokenSotrage)
     {
-        $this->tokenStorage = $tokenStorage;
+        $this->tokenStorage = $tokenSotrage;
     }
 
     public static function getSubscribedEvents()
@@ -33,14 +33,15 @@ class UtilisateurEntitySubscriber implements EventSubscriberInterface
         $entity = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
 
-        /**@var UserInterface $utilisateur */
-        $utilisateur = $this->tokenStorage->getToken()->getUser();
+        /**
+         * @var UserInterface $utilisateur
+         */
+        $utilisateur = $this->tokenSotrage->getToken()->getUser();
 
-        if(!$entity instanceof Fiche || Request::METHOD_POST !== $method){
+        if(!$entity instanceof Fiche || Request::METHOD_POST)
+        {
             return;
-        }else{
-            $entity->setUtilisateur($utilisateur);
         }
-
-   }
+        $entity->setUtilisateur($utilisateur);
+    }
 }

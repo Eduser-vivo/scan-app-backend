@@ -18,7 +18,9 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
  *      }
  *  )
  * 
- * @ApiResource()
+ * @ApiResource(
+ *  attributes={"order"= {"id": "DESC"}}
+ * )
  */
 class Fiche
 {
