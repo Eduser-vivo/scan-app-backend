@@ -48,16 +48,6 @@ class User implements UserInterface
      */
     private $email;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Fiche", mappedBy="utilisateur")
-     */
-    private $fiches;
-
-    public function __construct()
-    {
-        $this->fiches = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -97,14 +87,6 @@ class User implements UserInterface
         $this->email = $email;
 
         return $this;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getFiches(): Collection
-    {
-        return $this->fiches;
     }
 
     
